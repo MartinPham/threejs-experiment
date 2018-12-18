@@ -25,6 +25,7 @@ renderApp();
 
 if (module.hot) {
  	module.hot.accept('./render.js', function() {
-    	renderApp();
+    	// renderApp();
+		location.reload();
   	});
 }

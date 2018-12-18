@@ -40,7 +40,7 @@ export default class Controller {
 			blocker = document.createElement('div');
 			blocker.id = 'pointerLockBlocker';
 
-			let button = document.getElementById('div');
+			let button = document.createElement('div');
 			button.innerHTML = 'Click to play' +
 				'<br/>' +
 				'(W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)';
