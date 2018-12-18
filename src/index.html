@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <head>
+    <title>App</title>
+  </head>
+  <body>
+    <div id="pointerLockBlocker">
+      <div onclick="window.postMessage({ type: 'POINTER_LOCK_CONTROLLER/LOCK'})">
+        Click to play
+        <br/>
+        (W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
+      </div>
+    </div>
+    <div id='app'></div>
+  </body>
+</html>
