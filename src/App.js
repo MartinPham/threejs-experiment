@@ -168,10 +168,10 @@ export default class App {
 			},
 			// called while loading is progressing
 			(xhr) => {
-				if(document.getElementById('pointerLockBlocker'))
-					{
-						document.getElementById('pointerLockBlocker').innerHTML = ( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-					}
+				// if(document.getElementById('pointerLockBlocker'))
+				// 	{
+				// 		document.getElementById('pointerLockBlocker').innerHTML = ( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+				// 	}
 				
 			},
 			// called when loading has errors

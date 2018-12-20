@@ -31,7 +31,7 @@ export default class Control {
 	constructor(object, element, getObjects)
 	{
 		this.element = element || document.body;
-		this.isLocked = true;
+		this.isLocked = false;
 
 		this.getObjects = getObjects;
 
@@ -61,6 +61,8 @@ export default class Control {
 
 			blocker.addEventListener('click', () => {
 				window.postMessage({ type: 'POINTER_LOCK_CONTROLLER/LOCK'});
+
+				this.isLocked = true;
 			}, false);
 
 
