@@ -1,184 +1,296 @@
 import {
 	Object3D,
-	Quaternion,
-	Vector3,
-	Euler
+	Raycaster,
+	Vector3
 } from 'three';
 
-import {
-	Vec3
-} from 'cannon';
+const PI_2 = Math.PI / 2;
 
-export default function ( camera, cannonBody ) {
+export default class Control {
+	element = null;
+	isLocked = false;
+	object = null;
+	pitchObject = null;
+	yawObject = null;
 
-	var eyeYPos = 2; // eyes are 2 meters above the ground
-	var velocityFactor = 0.2;
-	var jumpVelocity = 20;
-	var scope = this;
+	moveForward = false;
+	moveBackward = false;
+	moveLeft = false;
+	moveRight = false;
+	moveDown = true;
 
-	var pitchObject = new Object3D();
-	pitchObject.add( camera );
+	raycaster = null;
 
-	var yawObject = new Object3D();
-	yawObject.position.y = 2;
-	yawObject.add( pitchObject );
+	prevTime = performance.now();
 
-	var quat = new Quaternion();
+	velocity = new Vector3();
+	direction = new Vector3();
 
-	var moveForward = false;
-	var moveBackward = false;
-	var moveLeft = false;
-	var moveRight = false;
+	getObjects = () => [];
 
-	var canJump = false;
+	constructor(object, element, getObjects)
+	{
+		this.element = element || document.body;
+		this.isLocked = true;
 
-	var contactNormal = new Vec3(); // Normal in the contact, pointing *out* of whatever the player touched
-	var upAxis = new Vec3(0,1,0);
-	cannonBody.addEventListener("collide",function(e){
-		var contact = e.contact;
+		this.getObjects = getObjects;
 
-		// contact.bi and contact.bj are the colliding bodies, and contact.ni is the collision normal.
-		// We do not yet know which one is which! Let's check.
-		if(contact.bi.id == cannonBody.id)  // bi is the player body, flip the contact normal
-			contact.ni.negate(contactNormal);
-		else
-			contactNormal.copy(contact.ni); // bi is something else. Keep the normal as it is
+		this.object = object;
+		this.object.rotation.set(0, 0, 0);
 
-		// If contactNormal.dot(upAxis) is between 0 and 1, we know that the contact normal is somewhat in the up direction.
-		if(contactNormal.dot(upAxis) > 0.5) // Use a "good" threshold value between 0 and 1 here!
-			canJump = true;
-	});
 
-	var velocity = cannonBody.velocity;
+		this.pitchObject = new Object3D();
+		this.pitchObject.add(this.object);
 
-	var PI_2 = Math.PI / 2;
 
-	var onMouseMove = function ( event ) {
+		this.yawObject = new Object3D();
+		this.yawObject.position.y = 100;
+		this.yawObject.add(this.pitchObject);
 
-		if ( scope.enabled === false ) return;
+		document.addEventListener('mousemove', (event) => this.onMouseMove(event), false);
+		document.addEventListener('pointerlockchange', (event) => this.onPointerLockChange(event), false);
+		document.addEventListener('pointerlockerror', (event) => this.onPointerLockError(event), false);
 
-		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-		yawObject.rotation.y -= movementX * 0.002;
-		pitchObject.rotation.x -= movementY * 0.002;
+		let blocker = document.getElementById('pointerLockBlocker');
+		if(!blocker)
+		{
+			blocker = document.createElement('div');
+			blocker.id = 'pointerLockBlocker';
+			blocker.innerHTML = 'MOUSE';
 
-		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
-	};
+			blocker.addEventListener('click', () => {
+				window.postMessage({ type: 'POINTER_LOCK_CONTROLLER/LOCK'});
+			}, false);
 
-	var onKeyDown = function ( event ) {
 
-		switch ( event.keyCode ) {
-
-			case 38: // up
-			case 87: // w
-				moveForward = true;
-				break;
-
-			case 37: // left
-			case 65: // a
-				moveLeft = true; break;
-
-			case 40: // down
-			case 83: // s
-				moveBackward = true;
-				break;
-
-			case 39: // right
-			case 68: // d
-				moveRight = true;
-				break;
-
-			case 32: // space
-				if ( canJump === true ){
-					velocity.y = jumpVelocity;
-				}
-				canJump = false;
-				break;
+			document.body.prepend(blocker);
 		}
 
-	};
+		window.addEventListener('message', (event) => {
+			if(event.data.type ==='POINTER_LOCK_CONTROLLER/LOCK')
+			{
+				this.lockPointer();
+			}
+		}, false);
 
-	var onKeyUp = function ( event ) {
 
-		switch( event.keyCode ) {
 
-			case 38: // up
-			case 87: // w
-				moveForward = false;
-				break;
 
-			case 37: // left
-			case 65: // a
-				moveLeft = false;
-				break;
+		this.raycaster = new Raycaster(new Vector3(), new Vector3(0, -1, 0), 0, 10);
 
-			case 40: // down
-			case 83: // a
-				moveBackward = false;
-				break;
-
-			case 39: // right
-			case 68: // d
-				moveRight = false;
-				break;
-
-		}
-
-	};
-
-	document.addEventListener( 'mousemove', onMouseMove, false );
-	document.addEventListener( 'keydown', onKeyDown, false );
-	document.addEventListener( 'keyup', onKeyUp, false );
-
-	this.enabled = true;
-
-	this.getObject = function () {
-		return yawObject;
-	};
-
-	this.getDirection = function(targetVec){
-		targetVec.set(0,0,-1);
-		quat.multiplyVector3(targetVec);
+		document.addEventListener('keydown', (event) => this.onKeyDown(event), false);
+		document.addEventListener('touchstart', (event) => this.onKeyDown({
+			keyCode: 87
+		}), false);
+		document.addEventListener('keyup', (event) => this.onKeyUp(event), false);
+		document.addEventListener('touchend', (event) => this.onKeyUp({
+			keyCode: 87
+		}), false);
 	}
 
-	// Moves the camera to the Cannon.js object position and adds velocity to the object if the run key is down
-	var inputVelocity = new Vector3();
-	var euler = new Euler();
-	this.update = function ( delta ) {
+	update()
+	{
+		if (this.isLocked === false) return;
 
-		if ( scope.enabled === false ) return;
+		let headObject = this.getObject();
 
-		delta *= 0.1;
 
-		inputVelocity.set(0,0,0);
+		let scanDirections = {
+			front: [0, 0, -1],
+			behind: [0, 0, 1],
+			left: [-1, 0, 0],
+			right: [1, 0, 0],
+			above: [0, 1, 0],
+			bottom: [0, -1, 0],
+		};
 
-		if ( moveForward ){
-			inputVelocity.z = -velocityFactor * delta;
+		let intersections = {};
+
+		let objects = this.getObjects();
+
+		// console.log(objects)
+
+		for(let scanDirection in scanDirections)
+		{
+			let directionVector = new Vector3(
+				scanDirections[scanDirection][0],
+				scanDirections[scanDirection][1],
+				scanDirections[scanDirection][2]
+			);
+
+			directionVector.applyQuaternion(headObject.quaternion);
+			this.raycaster.ray.origin.copy(headObject.position);
+			this.raycaster.ray.direction.copy(directionVector);
+
+			intersections[scanDirection] = this.raycaster.intersectObjects(objects, true);
+
+			// for (var i = 0; i < intersections[scanDirection].length; i++) {
+			//     intersections[scanDirection][i].object.material.color.set(0xff0000);
+			// }
 		}
-		if ( moveBackward ){
-			inputVelocity.z = velocityFactor * delta;
+
+		// console.log(intersections)
+
+
+		if (intersections.front.length > 0) {
+			console.log('cannot go front')
+			this.moveForward = false;
+		}
+		if (intersections.behind.length > 0) {
+			this.moveBackward = false;
+		}
+		if (intersections.left.length > 0) {
+			this.moveLeft = false;
+		}
+		if (intersections.right.length > 0) {
+			this.moveRight = false;
+		}
+		if (intersections.bottom.length > 0) {
+			this.moveDown = false;
+		} else {
+			this.moveDown = true;
 		}
 
-		if ( moveLeft ){
-			inputVelocity.x = -velocityFactor * delta;
+		let time = performance.now();
+		let delta = (time - this.prevTime) / 1000;
+
+		// console.log(delta)
+
+		this.velocity.x -= this.velocity.x * 10.0 * delta;
+		this.velocity.z -= this.velocity.z * 10.0 * delta;
+
+		this.velocity.y -= 10; // 100.0 = mass
+
+
+
+		this.direction.z = Number(this.moveForward) - Number(this.moveBackward);
+		this.direction.x = Number(this.moveLeft) - Number(this.moveRight);
+
+		this.direction.normalize(); // this ensures consistent movements in all directions
+		if (this.moveForward || this.moveBackward) this.velocity.z -= this.direction.z * 400.0 * delta;
+		if (this.moveLeft || this.moveRight) this.velocity.x -= this.direction.x * 400.0 * delta;
+
+		// if (intersections.bottom.length > 0) {
+		// 	this.velocity.y = Math.max(0, this.velocity.y);
+		// 	this.canJump = true;
+		// }
+
+		headObject.translateX(this.velocity.x * delta);
+		headObject.translateZ(this.velocity.z * delta);
+
+		if(this.moveDown)
+		{
+			if(headObject.position.y > 0)
+			{
+				headObject.translateY(this.velocity.y * delta);
+			} 
+// 			else {
+// 				console.log('move up')
+// 				headObject.position.set(0, 100, 0);
+// 
+// 				headObject.rotation.set(0, 0, 0);
+// 			}
+			
 		}
-		if ( moveRight ){
-			inputVelocity.x = velocityFactor * delta;
+		
+		// console.log(headObject.position.y);
+// 
+// 		if (headObject.position.y < -10) {
+// 
+// 			this.velocity.y = 500;
+// 		}
+
+
+		this.prevTime = time;
+	}
+
+
+
+	getObject()
+	{
+		return this.yawObject;
+	}
+
+	onKeyDown = (event) => {
+		// console.log(this.object)
+		switch (event.keyCode) {
+			case 38: // up
+			case 87: // w
+				this.moveForward = true;
+				break;
+			case 37: // left
+			case 65: // a
+				this.moveLeft = true;
+				break;
+			case 40: // down
+			case 83: // s
+				this.moveBackward = true;
+				break;
+			case 39: // right
+			case 68: // d
+				this.moveRight = true;
+				break;
+			case 32: // space
+				if (this.canJump === true) this.velocity.y += 350;
+				this.canJump = false;
+				break;
 		}
-
-		// Convert velocity to world coordinates
-		euler.x = pitchObject.rotation.x;
-		euler.y = yawObject.rotation.y;
-		euler.order = "XYZ";
-		quat.setFromEuler(euler);
-		inputVelocity.applyQuaternion(quat);
-		//quat.multiplyVector3(inputVelocity);
-
-		// Add to the object
-		velocity.x += inputVelocity.x;
-		velocity.z += inputVelocity.z;
-
-		yawObject.position.copy(cannonBody.position);
 	};
-};
+
+
+	onKeyUp = (event) => {
+		switch (event.keyCode) {
+			case 38: // up
+			case 87: // w
+				this.moveForward = false;
+				break;
+			case 37: // left
+			case 65: // a
+				this.moveLeft = false;
+				break;
+			case 40: // down
+			case 83: // s
+				this.moveBackward = false;
+				break;
+			case 39: // right
+			case 68: // d
+				this.moveRight = false;
+				break;
+		}
+	};
+
+	onMouseMove = (event) =>
+	{
+		if (this.isLocked === false) return;
+
+		let movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+		let movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+		this.yawObject.rotation.y -= movementX * 0.002;
+		this.pitchObject.rotation.x -= movementY * 0.002;
+
+		this.pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, this.pitchObject.rotation.x));
+	};
+
+	onPointerLockChange = (event) =>
+	{
+		if (document.pointerLockElement === this.element) {
+			this.isLocked = true;
+			document.getElementById('pointerLockBlocker').style.display = 'none';
+		} else {
+			this.isLocked = false;
+			document.getElementById('pointerLockBlocker').style.display = 'block';
+		}
+	};
+
+	onPointerLockError = (event) =>
+	{
+		console.error('Unable to use Pointer Lock API');
+	};
+
+	lockPointer = (event) =>
+	{
+		this.element.requestPointerLock();
+	};
+}
