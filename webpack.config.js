@@ -19,6 +19,18 @@ const config = {
 	module: {
 		rules: [
 		    {
+		    	test: /\.(gltf|bin|jpg|png|obj|wrl)$/,
+		        use: [
+		          {
+		            loader: 'file-loader',
+		            options: {
+		            	name: '[path][name].[ext]',
+    					context: ''
+		            }
+		          }
+		        ]
+		    },
+		    {
 		    	test: /\.m?js$/,
 		    	exclude: /(node_modules|bower_components)/,
 		    	use: {
@@ -36,7 +48,7 @@ const config = {
 		]
 	},
 	// plugins: plugins
-}
+};
 
 let scssLoaders = [
 	'css-loader',

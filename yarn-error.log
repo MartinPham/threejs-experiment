@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/Cellar/node/11.3.0_1/bin/node /usr/local/Cellar/yarn/1.12.3/libexec/bin/yarn.js start
+  /usr/local/Cellar/node/11.3.0_1/bin/node /usr/local/Cellar/yarn/1.12.3/libexec/bin/yarn.js add three-object-loader
 
 PATH: 
   /Users/zzz/perl5/bin:/usr/local/opt/mysql@5.7/bin:/opt/theos/bin:/Users/zzz/Library/Android/sdk/emulator:/Z/DEV/ML/pio/bin:/Z/DEV/FLUTTER/flutter/bin:/Users/zzz/Library/Android/sdk/tools:/Users/zzz/Library/Android/sdk:/usr/local/sbin:/Users/zzz/.composer/vendor/bin:/Users/zzz/bin:/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin:/Users/zzz/Library/Android/sdk/tools/bin:/Users/zzz/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Xamarin Workbooks.app/Contents/SharedSupport/path-bin:/Z/DEV/ML/PredictionIO/bin:/Users/zzz/PredictionIO/bin
@@ -14,35 +14,47 @@ Platform:
   darwin x64
 
 Trace: 
-  SyntaxError: /Z/DEV/WWW/3js/exp/package.json: Unexpected token } in JSON at position 631
-      at JSON.parse (<anonymous>)
-      at /usr/local/Cellar/yarn/1.12.3/libexec/lib/cli.js:1631:59
-      at Generator.next (<anonymous>)
-      at step (/usr/local/Cellar/yarn/1.12.3/libexec/lib/cli.js:304:30)
-      at /usr/local/Cellar/yarn/1.12.3/libexec/lib/cli.js:315:13
+  Error: https://registry.yarnpkg.com/three-object-loader: Not found
+      at Request.params.callback [as _callback] (/usr/local/Cellar/yarn/1.12.3/libexec/lib/cli.js:65894:18)
+      at Request.self.callback (/usr/local/Cellar/yarn/1.12.3/libexec/lib/cli.js:129018:22)
+      at Request.emit (events.js:182:13)
+      at Request.<anonymous> (/usr/local/Cellar/yarn/1.12.3/libexec/lib/cli.js:129990:10)
+      at Request.emit (events.js:182:13)
+      at IncomingMessage.<anonymous> (/usr/local/Cellar/yarn/1.12.3/libexec/lib/cli.js:129912:12)
+      at Object.onceWrapper (events.js:273:13)
+      at IncomingMessage.emit (events.js:187:15)
+      at endReadableNT (_stream_readable.js:1098:12)
+      at process.internalTickCallback (internal/process/next_tick.js:72:19)
 
 npm manifest: 
   {
     "dependencies": {
       "@babel/core": "^7.2.2",
+      "@babel/plugin-proposal-class-properties": "^7.2.1",
       "@babel/preset-env": "^7.2.0",
       "babel-loader": "^8.0.4",
+      "cannon": "^0.6.2",
       "clean-webpack-plugin": "^1.0.0",
+      "cross-env": "^5.2.0",
       "css-loader": "^2.0.1",
+      "file-loader": "^2.0.0",
       "html-webpack-plugin": "^3.2.0",
       "mini-css-extract-plugin": "^0.5.0",
       "node-sass": "^4.11.0",
       "sass-loader": "^7.1.0",
       "style-loader": "^0.23.1",
       "three": "^0.99.0",
+      "three-gltf-loader": "^1.99.1",
       "ts-loader": "^5.3.1",
       "typescript": "^3.2.2",
       "webpack": "^4.27.1",
-      "webpack-dev-server": "^3.1.10"
+      "webpack-dev-server": "^3.1.10",
+      "webvr-polyfill": "^0.10.10",
+      "webxr-polyfill": "^1.0.13"
     },
     "scripts": {
-      "build": "webpack --config webpack.config.js",
-      "start": "webpack-dev-server --config webpack.config.js --open",
+      "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+      "start": "cross-env NODE_ENV=development webpack-dev-server --config webpack.config.js --host 0.0.0.0 --hot"
     },
     "devDependencies": {
       "webpack-cli": "^3.1.2"
@@ -118,6 +130,17 @@ Lockfile:
       "@babel/helper-hoist-variables" "^7.0.0"
       "@babel/traverse" "^7.1.0"
       "@babel/types" "^7.0.0"
+  
+  "@babel/helper-create-class-features-plugin@^7.2.1":
+    version "7.2.2"
+    resolved "https://registry.yarnpkg.com/@babel/helper-create-class-features-plugin/-/helper-create-class-features-plugin-7.2.2.tgz#aac79552e41c94716a804d371e943f20171df0c5"
+    integrity sha512-Q4qZE5wS3NWpOS6UV9yhIS/NmSyf2keF0E0IwDvx8WxTheVopVIY6BSQ/0vz72OTTruz0cOA2yIUh6Kdg3qprA==
+    dependencies:
+      "@babel/helper-function-name" "^7.1.0"
+      "@babel/helper-member-expression-to-functions" "^7.0.0"
+      "@babel/helper-optimise-call-expression" "^7.0.0"
+      "@babel/helper-plugin-utils" "^7.0.0"
+      "@babel/helper-replace-supers" "^7.1.0"
   
   "@babel/helper-define-map@^7.1.0":
     version "7.1.0"
@@ -281,6 +304,14 @@ Lockfile:
       "@babel/helper-plugin-utils" "^7.0.0"
       "@babel/helper-remap-async-to-generator" "^7.1.0"
       "@babel/plugin-syntax-async-generators" "^7.2.0"
+  
+  "@babel/plugin-proposal-class-properties@^7.2.1":
+    version "7.2.1"
+    resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-class-properties/-/plugin-proposal-class-properties-7.2.1.tgz#c734a53e0a1ec40fe5c22ee5069d26da3b187d05"
+    integrity sha512-/4FKFChkQ2Jgb8lBDsvFX496YTi7UWTetVgS8oJUpX1e/DlaoeEK57At27ug8Hu2zI2g8bzkJ+8k9qrHZRPGPA==
+    dependencies:
+      "@babel/helper-create-class-features-plugin" "^7.2.1"
+      "@babel/helper-plugin-utils" "^7.0.0"
   
   "@babel/plugin-proposal-json-strings@^7.2.0":
     version "7.2.0"
@@ -1326,6 +1357,20 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000921.tgz#7a607c1623444b22351d834e093aedda3c42fbe8"
     integrity sha512-Bu09ciy0lMWLgpYC77I0YGuI8eFRBPPzaSOYJK1jTI64txCphYCqnWbxJYjHABYVt/TYX/p3jNjLBR87u1Bfpw==
   
+  cannon@^0.6.2:
+    version "0.6.2"
+    resolved "https://registry.yarnpkg.com/cannon/-/cannon-0.6.2.tgz#1e7bc72dd5841982f3c104c2bc578bfa4fb1c572"
+    integrity sha1-HnvHLdWEGYLzwQTCvFeL+k+xxXI=
+  
+  cardboard-vr-display@^1.0.16:
+    version "1.0.16"
+    resolved "https://registry.yarnpkg.com/cardboard-vr-display/-/cardboard-vr-display-1.0.16.tgz#f91e2798e8fb70a348599638c6742c72dfeadabc"
+    integrity sha512-GFBWPMH/ixy4Ji014BAO1ryddGHphtJlA8gUR6UdKsOpPjUQukCKpgsx2XIJ5oBlqXnDQOcLVRqBWyuvTI32jQ==
+    dependencies:
+      gl-preserve-state "^1.0.0"
+      nosleep.js "^0.7.0"
+      webvr-polyfill-dpdb "^1.0.11"
+  
   caseless@~0.12.0:
     version "0.12.0"
     resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
@@ -1626,6 +1671,14 @@ Lockfile:
       ripemd160 "^2.0.0"
       safe-buffer "^5.0.1"
       sha.js "^2.4.8"
+  
+  cross-env@^5.2.0:
+    version "5.2.0"
+    resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-5.2.0.tgz#6ecd4c015d5773e614039ee529076669b9d126f2"
+    integrity sha512-jtdNFfFW1hB7sMhr/H6rW1Z45LFqyI431m3qU6bFXcQ3Eh7LtBuG3h74o7ohHZ3crrRkkqHlo4jYHFPcjroANg==
+    dependencies:
+      cross-spawn "^6.0.5"
+      is-windows "^1.0.0"
   
   cross-spawn@^3.0.0:
     version "3.0.1"
@@ -2266,6 +2319,14 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/figgy-pudding/-/figgy-pudding-3.5.1.tgz#862470112901c727a0e495a80744bd5baa1d6790"
     integrity sha512-vNKxJHTEKNThjfrdJwHc7brvM6eVevuO5nTj6ez8ZQ1qbXTvGthucRF7S4vf2cr71QVnT70V34v0S1DyQsti0w==
   
+  file-loader@^2.0.0:
+    version "2.0.0"
+    resolved "https://registry.yarnpkg.com/file-loader/-/file-loader-2.0.0.tgz#39749c82f020b9e85901dcff98e8004e6401cfde"
+    integrity sha512-YCsBfd1ZGCyonOKLxPiKPdu+8ld9HAaMEvJewzz+b2eTF7uL5Zm/HdBF6FjCrpCMRq25Mi0U1gl4pwn2TlH7hQ==
+    dependencies:
+      loader-utils "^1.0.2"
+      schema-utils "^1.0.0"
+  
   fill-range@^4.0.0:
     version "4.0.0"
     resolved "https://registry.yarnpkg.com/fill-range/-/fill-range-4.0.0.tgz#d544811d428f98eb06a63dc402d2403c328c38f7"
@@ -2492,6 +2553,16 @@ Lockfile:
     integrity sha1-Xv+OPmhNVprkyysSgmBOi6YhSfo=
     dependencies:
       assert-plus "^1.0.0"
+  
+  gl-matrix@^2.8.1:
+    version "2.8.1"
+    resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-2.8.1.tgz#1c7873448eac61d2cd25803a074e837bd42581a3"
+    integrity sha512-0YCjVpE3pS5XWlN3J4X7AiAx65+nqAI54LndtVFnQZB6G/FVLkZH8y8V6R3cIoOQR4pUdfwQGd1iwyoXHJ4Qfw==
+  
+  gl-preserve-state@^1.0.0:
+    version "1.0.0"
+    resolved "https://registry.yarnpkg.com/gl-preserve-state/-/gl-preserve-state-1.0.0.tgz#4ef710d62873f1470ed015c6546c37dacddd4198"
+    integrity sha512-zQZ25l3haD4hvgJZ6C9+s0ebdkW9y+7U2qxvGu1uWOJh8a4RU+jURIKEQhf8elIlFpMH6CrAY2tH0mYrRjet3Q==
   
   glob-parent@^3.1.0:
     version "3.1.0"
@@ -3103,7 +3174,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/is-utf8/-/is-utf8-0.2.1.tgz#4b0da1442104d1b336340e80797e865cf39f7d72"
     integrity sha1-Sw2hRCEE0bM2NA6AeX6GXPOffXI=
   
-  is-windows@^1.0.2:
+  is-windows@^1.0.0, is-windows@^1.0.2:
     version "1.0.2"
     resolved "https://registry.yarnpkg.com/is-windows/-/is-windows-1.0.2.tgz#d1850eb9791ecd18e6182ce12a30f396634bb19d"
     integrity sha512-eXK1UInq2bPmjyX6e3VHIzMLobc4J94i4AWn+Hpq3OU5KkrRC96OAcR3PRJ/pGu6m8TRnBHP9dkXQVsT/COVIA==
@@ -3830,6 +3901,11 @@ Lockfile:
     integrity sha1-GrKLVW4Zg2Oowab35vogE3/mrtk=
     dependencies:
       remove-trailing-separator "^1.0.1"
+  
+  nosleep.js@^0.7.0:
+    version "0.7.0"
+    resolved "https://registry.yarnpkg.com/nosleep.js/-/nosleep.js-0.7.0.tgz#cfd919c25523ca0d0f4a69fb3305c083adaee289"
+    integrity sha1-z9kZwlUjyg0PSmn7MwXAg62u4ok=
   
   npm-bundled@^1.0.1:
     version "1.0.5"
@@ -5277,6 +5353,11 @@ Lockfile:
       source-map "~0.6.1"
       source-map-support "~0.5.6"
   
+  three-gltf-loader@^1.99.1:
+    version "1.99.1"
+    resolved "https://registry.yarnpkg.com/three-gltf-loader/-/three-gltf-loader-1.99.1.tgz#08a798857b16dd03d1fa31bf535ff86a5c20b394"
+    integrity sha512-rDpe3gjVcDkSh1G2goNkW5CD8PKM90Ryj7NkkBLlOUayR1XEuTWFhf8bJXom8Z0DQSrXSAktrBxNbXXxtwL/AA==
+  
   three@^0.99.0:
     version "0.99.0"
     resolved "https://registry.yarnpkg.com/three/-/three-0.99.0.tgz#65711fda7a16501da83948121437d824df1fea19"
@@ -5739,6 +5820,26 @@ Lockfile:
     version "0.1.3"
     resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.3.tgz#5d2ff22977003ec687a4b87073dfbbac146ccf29"
     integrity sha512-nqHUnMXmBzT0w570r2JpJxfiSD1IzoI+HGVdd3aZ0yNi3ngvQ4jv1dtHt5VGxfI2yj5yqImPhOK4vmIh2xMbGg==
+  
+  webvr-polyfill-dpdb@^1.0.11:
+    version "1.0.11"
+    resolved "https://registry.yarnpkg.com/webvr-polyfill-dpdb/-/webvr-polyfill-dpdb-1.0.11.tgz#bf059fcac45f74d48358a430c87834fbe4bb4077"
+    integrity sha512-J07mf6xFkKIp5pcsPEhee3D1ddk/ACLrlTJ2/cQbH00Xc+dRam6cJJuj/cNTeX2Dn2txY49NhPh4K1ycg3BrZQ==
+  
+  webvr-polyfill@^0.10.10:
+    version "0.10.10"
+    resolved "https://registry.yarnpkg.com/webvr-polyfill/-/webvr-polyfill-0.10.10.tgz#f945759a37a2ada57211ed29cf55a80179e74d26"
+    integrity sha512-WdKQ1XR9X2Gj9RUtmr+DajvWBWPva75m1rm0Z7CibR7ZstCm913zHYToxw0p/EK342wAxGfiWKsBmb3Jd5OO0w==
+    dependencies:
+      cardboard-vr-display "^1.0.16"
+  
+  webxr-polyfill@^1.0.13:
+    version "1.0.13"
+    resolved "https://registry.yarnpkg.com/webxr-polyfill/-/webxr-polyfill-1.0.13.tgz#f24c3da63aaf25aa333f08545948827cd96d9a0a"
+    integrity sha512-hvAhtkYAOatpKumRw/rHLT2pxEyGn6XEJg8KOnI5y/6JA/yYXCpyL2Fy1vq92GVjvaj11VGWGKgSRHUhu+9RFA==
+    dependencies:
+      cardboard-vr-display "^1.0.16"
+      gl-matrix "^2.8.1"
   
   which-module@^1.0.0:
     version "1.0.0"
